@@ -1,0 +1,17 @@
+APP SICOSEP CENASE - INSTALACIÓN EN WINDOWS
+
+1. Instala Python desde https://www.python.org/downloads/ (activa 'Add Python to PATH').
+2. Descomprime esta carpeta.
+3. Abre una terminal (CMD o PowerShell) dentro de la carpeta.
+4. Ejecuta: python -m pip install -r requirements.txt
+5. Ejecuta: python -m streamlit run app.py
+6. Se abrirá una página web local, normalmente http://localhost:8501
+7. Arrastra todos los PDFs, verifica las fechas y descarga el Excel.
+
+IMPORTANTE
+- Un Nivel 1 con reentrenamiento NO renueva automáticamente Nivel 2.
+- La fecha del certificado válido por 24 horas NO es la del vencimiento de la capacitación.
+- Los semáforos a 24 meses son alertas de control sujetas a validación normativa/SICOSEP.
+- Algunos certificados PDF escaneados no tienen texto seleccionable: se mostrarán como error y requieren OCR.
+- No hay almacenamiento permanente ni envío de correos. Guarda los Excel descargados.
+- Revisa los campos de cédula, fechas y nombre antes de utilizar la información administrativamente.
