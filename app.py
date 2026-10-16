@@ -45,7 +45,7 @@ def dates_in(text):
     result = []
     for m in re.finditer(DATE_TOKEN, text):
         parsed = iso_date(m.group(0))
-        if parsed and parsed not in result:
+        if parsed and parsed not in result and pd.Timestamp(parsed).year >= 2000:
             result.append(parsed)
     return result
 
@@ -164,26 +164,17 @@ def enrich(df):
                 notes.append('No se registra reentrenamiento ni fecha de Nivel 2')
         r['Próximo reentrenamiento (N1 y N2)'] = due
         r['Estado reentrenamiento (N1 y N2)'] = state
-        for lvl in (1,2):
-            r[f'Estado reent. N{lvl}'] = state if lvl in levels else 'SIN NIVEL'
-        initial_n2 = iso_date(r.get('Nivel 2',''))
-        n2_due = add_24_months(initial_n2) if initial_n2 else None
-        n2_state, _ = get_state(n2_due, today) if n2_due else ('SIN DATOS','')
-        r['Vencimiento curso N2'] = n2_due.isoformat() if n2_due else ''
-        r['Estado curso N2'] = n2_state
-        if n2_state == 'VENCIDO' and training:
-            notes.append('Fecha inicial N2 supera 24 meses; estado general se evalúa con el reentrenamiento más reciente')
-        r['Estado general'] = state  # La última actualización manda; N2 queda como control informativo separado.
+        # Un único control compartido: no duplicar vencimientos ni estados N1/N2.
+        r['Estado general'] = state
         r['Observaciones'] = '; '.join(filter(None,[str(r.get('Observaciones','')).strip(), *notes]))
         records.append(r)
     return pd.DataFrame(records)
 
 MAIN_COLUMNS = [
     'Cédula', 'Nombres y apellidos', 'Nivel 1', 'Nivel 2',
-    'Vencimiento curso N2', 'Estado curso N2',
-    'Último reentrenamiento (N1 y N2)', 'Próximo reentrenamiento (N1 y N2)',
-    'Estado reent. N1', 'Estado reent. N2', 'Estado reentrenamiento (N1 y N2)',
-    'Estado general', 'Fecha base del control', 'Origen fecha reentrenamiento', 'Observaciones', 'Archivo PDF'
+    'Último reentrenamiento (N1 y N2)', 'Fecha base del control',
+    'Próximo reentrenamiento (N1 y N2)', 'Estado general',
+    'Origen fecha reentrenamiento', 'Observaciones', 'Archivo PDF'
 ]
 
 def excel_bytes(df, hist):
@@ -211,7 +202,7 @@ def excel_bytes(df, hist):
                             ws.conditional_format(1,col,len(data),col,{'type':'text','criteria':'containing','value':phrase,'format':fmt})
     return output.getvalue()
 
-st.info('**Regla del control:** se toma el reentrenamiento MÁS RECIENTE del PDF y se aplica a ambos niveles; vencimiento = última fecha + 24 meses. Si no constan reentrenamientos, se usa la fecha de registro de Nivel 2 + 24 meses. El control histórico del curso N2 se muestra aparte y NO reemplaza el estado general cuando existe un reentrenamiento posterior.')
+st.info('**ÚNICO CONTROL PARA NIVEL 1 Y NIVEL 2:** última fecha de reentrenamiento del PDF + 24 meses. Si no aparece reentrenamiento, fecha de Nivel 2 + 24 meses. Una única columna de vencimiento y estado.')
 files=st.file_uploader('Sube certificados SICOSEP en PDF (admite carga múltiple)',type=['pdf'],accept_multiple_files=True)
 if files:
     rows=[]; histories=[]; errors=[]
@@ -227,15 +218,15 @@ if files:
         if raw.duplicated('Cédula',keep=False).any():
             st.warning('Cédulas duplicadas: revisa los archivos antes de exportar.')
         st.subheader('1. Validar fechas identificadas en PDF')
-        st.caption('Una sola columna de reentrenamiento para ambos niveles. Puedes editarla si el PDF contiene una fecha que no fue reconocida automáticamente.')
+        st.caption('La última fecha de la tabla Reentrenamientos del PDF controla AMBOS niveles. Cuando no conste, se toma Nivel 2; puedes corregir la fecha antes de exportar.')
         edited=st.data_editor(raw,num_rows='dynamic',hide_index=True,use_container_width=True,key='extracted')
         result=enrich(edited)
         st.subheader('2. Resultados y alertas')
         k1,k2,k3,k4=st.columns(4)
         k1.metric('Guardias',len(result))
-        k2.metric('Reentrenamiento vencido',int((result['Estado reentrenamiento (N1 y N2)']=='VENCIDO').sum()))
-        k3.metric('Próximos / críticos',int(result['Estado reentrenamiento (N1 y N2)'].isin(['CRÍTICO','POR VENCER']).sum()))
-        k4.metric('Sin datos / revisar',int(result['Estado reentrenamiento (N1 y N2)'].isin(['SIN DATOS','REVISAR']).sum()))
+        k2.metric('Reentrenamiento vencido',int((result['Estado general']=='VENCIDO').sum()))
+        k3.metric('Próximos / críticos',int(result['Estado general'].isin(['CRÍTICO','POR VENCER']).sum()))
+        k4.metric('Sin datos / revisar',int(result['Estado general'].isin(['SIN DATOS','REVISAR']).sum()))
         st.dataframe(result[MAIN_COLUMNS],hide_index=True,use_container_width=True)
         hist_df=pd.DataFrame(histories,columns=['Cédula','Nombre','Nivel','Tipo','Fecha','Convocatoria','Archivo'])
         st.download_button('⬇️ Descargar Excel + historial',data=excel_bytes(result,hist_df),file_name=f'SICOSEP_CENASE_{date.today():%Y%m%d}.xlsx',mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

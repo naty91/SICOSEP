@@ -1,22 +1,13 @@
-APP SICOSEP CENASE - INSTALACIÓN EN WINDOWS
+SICOSEP CENASE - CONTROL UNIFICADO DE REENTRENAMIENTO
 
-1. Instala Python desde https://www.python.org/downloads/ (activa 'Add Python to PATH').
-2. Descomprime esta carpeta.
-3. Abre una terminal (CMD o PowerShell) dentro de la carpeta.
-4. Ejecuta: python -m pip install -r requirements.txt
-5. Ejecuta: python -m streamlit run app.py
-6. Se abrirá una página web local, normalmente http://localhost:8501
-7. Arrastra todos los PDFs, verifica las fechas y descarga el Excel.
+1. Descomprime el archivo ZIP.
+2. Reemplaza app.py y requirements.txt en la carpeta de tu aplicación Streamlit.
+3. Si usas Streamlit Cloud, sube/confirma el cambio en GitHub y reinicia la app (Manage app -> Reboot).
+4. Si se ejecuta en PC: pip install -r requirements.txt; streamlit run app.py
+5. Carga los PDF nuevos y exporta Excel nuevo (no reutilices archivos Excel antiguos).
 
-IMPORTANTE
-- La fecha registrada del curso Nivel 2 se usa como fecha de emisión para el cálculo de vencimiento de curso a los 24 meses. Comprueba esa fecha con el documento oficial.
-- La vigencia del curso Nivel 2 no se extiende por un reentrenamiento.
-- El reentrenamiento de cada nivel se controla por separado: último reentrenamiento + 24 meses, o curso + 24 meses si no figura reentrenamiento.
-- La hoja RESUMEN distingue Estado curso N2, Estado reent. N1 y Estado reent. N2.
-- La fecha del certificado válido por 24 horas NO es la del vencimiento de la capacitación.
-- Los semáforos a 24 meses son alertas de control sujetas a validación normativa/SICOSEP.
-- Algunos certificados PDF escaneados no tienen texto seleccionable: se mostrarán como error y requieren OCR.
-- No hay almacenamiento permanente ni envío de correos. Guarda los Excel descargados.
-- Revisa los campos de cédula, fechas y nombre antes de utilizar la información administrativamente.
+REGLA: una sola fecha de reentrenamiento, la MÁS RECIENTE que figure en la tabla Reentrenamientos del certificado SICOSEP, válida para ambos niveles. Próximo vencimiento: + 24 meses. Si no hay reentrenamiento, se utiliza fecha de registro de Nivel 2 + 24 meses.
 
-REGLA ACTUAL: El último reentrenamiento del certificado actualiza ambos niveles, sumándole 24 meses. Si el certificado no contiene reentrenamientos, el control se calcula con la fecha de registro Nivel 2 + 24 meses. La fecha del curso Nivel 2 permanece informativa en columnas separadas.
+VERIFICACIÓN CON PDF SUMINISTRADOS:
+AGUINZACA TORRES MARVIN JOEL: reentrenamiento 2026-05-25, vence 2028-05-25 (AL DÍA el 2026-10-16).
+ABRIL MORALES ROBERTO ORLANDO: sin reentrenamiento, Nivel 2 2025-09-26, vence 2027-09-26.
