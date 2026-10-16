@@ -18,3 +18,5 @@ IMPORTANTE
 - Algunos certificados PDF escaneados no tienen texto seleccionable: se mostrarán como error y requieren OCR.
 - No hay almacenamiento permanente ni envío de correos. Guarda los Excel descargados.
 - Revisa los campos de cédula, fechas y nombre antes de utilizar la información administrativamente.
+
+REGLA ACTUAL: El último reentrenamiento del certificado actualiza ambos niveles, sumándole 24 meses. Si el certificado no contiene reentrenamientos, el control se calcula con la fecha de registro Nivel 2 + 24 meses. La fecha del curso Nivel 2 permanece informativa en columnas separadas.
